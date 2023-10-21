@@ -1,2 +1,1 @@
-from .controller import Controller
-from .components import Board
+from .Board import Board
