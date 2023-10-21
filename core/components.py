@@ -82,3 +82,9 @@ class Board:
     @property
     def state(self):
         return self.__matrix
+
+    def get_cell_color(self, cellname):
+        pos = self.cellname_to_pos(cellname)
+        if not pos:
+            return None
+        return sum(pos) % 2 # 0: WHITE, 1: BLACK
