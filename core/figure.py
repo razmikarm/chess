@@ -104,3 +104,9 @@ class Pawn(Figure):
 
     def make_move(self, pos):
         pass
+
+LEFT_SIDE = [Rook, Knight, Bishop]
+RIGHT_SIDE = LEFT_SIDE[::-1]
+
+WHITE_ORDER = LEFT_SIDE + [Queen, King] + RIGHT_SIDE
+BLACK_ORDER = LEFT_SIDE + [King, Queen] + RIGHT_SIDE
