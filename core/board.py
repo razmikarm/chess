@@ -1,4 +1,4 @@
-from.utils import Colors, ColorNames
+from.utils import Colors, COLOR_NAMES
 from .figure import ORDER, PAWNS, King
 
 class Board:
@@ -15,7 +15,7 @@ class Board:
 
     @property
     def turn(self):
-        return ColorNames[self._turn]
+        return COLOR_NAMES[self._turn]
 
     def set_up(self):
         self.__matrix[0] = [cls(Colors.BLACK) for cls in ORDER]
@@ -27,10 +27,15 @@ class Board:
         from_row, from_column = from_pos 
         to_row, to_column = to_pos 
         figure = self.__matrix[from_row][from_column]
-        if self.turn != figure.color:
+        if figure is None:
+            print('You have eentered an empty cell')
+            return
+        if self._turn != figure.color:
+            print('Not your turn')
             return
         new_cell = self.__matrix[to_row][to_column]
         if new_cell and new_cell.color == figure.color:
+            print("Can't move on busy cell")
             return
         if figure.check_move(from_pos, to_pos, self.state):
             self.__matrix[to_row][to_column] = figure

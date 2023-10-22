@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractstaticmethod
-from .utils import Validator
+from .utils import Validator, COLOR_NAMES
 
 
 class PieceTypes:
@@ -51,10 +51,10 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
         return board
 
     def __str__(self):
-        return f"{self.color} {self.type}"
+        return f"{COLOR_NAMES[self.color]} {self.type}"
 
     def __repr__(self):
-        return f"{self.color} {self.type}"
+        return f"{COLOR_NAMES[self.color]} {self.type}"
 
 
 class King(Figure):
@@ -91,13 +91,12 @@ class King(Figure):
             for j, figure in enumerate(row):
                 if isinstance(figure, King) and figure.color == color:
                     my_king_pos = (i, j)
+                elif isinstance(figure, King) and figure.color != color:
+                        opp_king_pos = (i, j)
                 elif figure and figure.color == color:
                     my_figures[(i, j)] = figure
                 elif figure:
-                    if isinstance(figure, King):
-                        opp_king_pos = (i, j)
-                    else:
-                        opponent_figures[(i, j)] = figure
+                    opponent_figures[(i, j)] = figure
         return {
             'my_figures': my_figures,
             'my_king_pos': my_king_pos,
@@ -107,8 +106,9 @@ class King(Figure):
 
     @staticmethod
     def check_for_check(color, board, cache=None) -> bool:
+        return True
         if cache is None:
-            cache = self._collect_board_data(color, board)
+            cache = King.collect_board_data(color, board)
         
         my_figures = cache['my_figures']
         my_king_pos = cache['my_king_pos']
@@ -157,10 +157,17 @@ class Queen(Figure):
     def possible_moves(curr_pos):
         moves = Rook.possible_moves(curr_pos)
         moves += Bishop.possible_moves(curr_pos)
+        return moves
 
     def check_move(self, curr_pos, new_pos, board):
-        cells = Rook.get_cells_btw(curr_pos, new_pos, board)
-        cells += Bishop.get_cells_btw(curr_pos, new_pos, board)
+        like_rook = Rook.is_valid_move(curr_pos, new_pos)
+        like_bishop = Bishop.is_valid_move(curr_pos, new_pos)
+        if not (like_rook or like_bishop):
+            return False
+        if like_rook:
+            cells = Rook.get_cells_btw(curr_pos, new_pos, board)
+        else:
+            cells = Bishop.get_cells_btw(curr_pos, new_pos, board)
         if any(cells):
             return False
         board = self.make_move(curr_pos, new_pos, board)
@@ -188,19 +195,27 @@ class Rook(Figure):
             test_board = list(zip(*board))
             curr, new = curr_row, new_row
             row = curr_column
-        elif curr_row == new_row:
+        else:
             test_board = board
             curr, new = curr_column, new_column
             row = curr_row
-        else:
-            return []
         if curr < new:
             low, high = curr, new
         else:
             low, high = new, curr
         return test_board[row][low + 1:high]
 
+    @staticmethod
+    def is_valid_move(curr_pos, new_pos):
+        curr_row, curr_column = curr_pos
+        new_row, new_column = new_pos
+        same_column = curr_column == new_column
+        same_row = curr_row == new_row
+        return same_column or same_row
+
     def check_move(self, curr_pos, new_pos, board):
+        if not self.is_valid_move(curr_pos, new_pos):
+            return False
         if any(self.get_cells_btw(curr_pos, new_pos, board)):
             return False
         board = self.make_move(curr_pos, new_pos, board)
@@ -234,22 +249,28 @@ class Bishop(Figure):
     def get_cells_btw(curr_pos, new_pos, board):
         curr_row, curr_column = curr_pos
         new_row, new_column = new_pos
-        col_diff = abs(curr_column - new_column)
-        row_diff = abs(curr_row - new_row)
-        if col_diff != row_diff:
-            return []
         # Row icrementing index
         rii = (-1) ** (curr_row > new_row)
         # Column icrementing index
         cii = (-1) ** (curr_column > new_column)
         result = []
-        for i in range(row_diff):
+        for i in range(1, abs(curr_row - new_row)):
             col = curr_column + i * cii
             row = curr_row + i * rii
             result.append(board[row][col])
         return result
 
+    @staticmethod
+    def is_valid_move(curr_pos, new_pos):
+        curr_row, curr_column = curr_pos
+        new_row, new_column = new_pos
+        col_diff = abs(curr_column - new_column)
+        row_diff = abs(curr_row - new_row)
+        return col_diff == row_diff
+
     def check_move(self, curr_pos, new_pos, board):
+        if not self.is_valid_move(curr_pos, new_pos):
+            return False
         if any(self.get_cells_btw(curr_pos, new_pos, board)):
             return False
         board = self.make_move(curr_pos, new_pos, board)
@@ -273,6 +294,8 @@ class Knight(Figure):
         return [pos for pos in moves if Validator.is_valid_pos(pos)]
 
     def check_move(self, curr_pos, new_pos, board):
+        if new_pos not in self.possible_moves(curr_pos):
+            return False
         board = self.make_move(curr_pos, new_pos, board)
         return King.check_for_check(self.color, board)
 
@@ -290,8 +313,28 @@ class Pawn(Figure):
     def check_move(self, curr_pos, new_pos, board):
         curr_row, curr_column = curr_pos
         new_row, new_column = new_pos
-        ...
+        
+        board = self.make_move(curr_pos, new_pos, board)
         return King.check_for_check(self.color, board)
 
 ORDER = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 PAWNS = [Pawn] * 8
+
+TEXT_FIGURES = {
+    1: {
+        Rook: "♖",
+        Knight: "♘",
+        Bishop: "♗",
+        King: "♔",
+        Queen: "♕",
+        Pawn: "♙",
+    },
+    0: {
+        Rook: "♜",
+        Knight: "♞",
+        Bishop: "♝",
+        King: "♚",
+        Queen: "♛",
+        Pawn: "♟︎",
+    },
+}

@@ -1,4 +1,4 @@
-
+from .figure import TEXT_FIGURES
 
 class PromptCLI:
 
@@ -32,7 +32,7 @@ class PromptCLI:
             'remove-board': self._ctrl.end_board,
         }
         self._show_commands = {
-            'show' : lambda: self._ctrl.show_board(self._curr_board_id),
+            'show' : lambda: self.board_view(self._ctrl.show_board(self._curr_board_id)),
             'current': lambda: self._curr_board_id,
             'help': lambda: self.HINT,
             'boards': self._ctrl.all_boards,
@@ -44,7 +44,7 @@ class PromptCLI:
 
     def _get_command(self):
         print("\nTo see all commands enter 'help'")
-        command = input('Please, enter your command: ')
+        command = input('Please, enter your command: ').lower()
         parts = command.strip().split()
         if not parts:
             return
@@ -59,12 +59,27 @@ class PromptCLI:
             return func(board_id)
         cur_state = self._ctrl.make_move(self._curr_board_id, *parts)
         if not cur_state:
-            print(f'Invalid move "{parts}"')
+            print(f'Invalid move "{parts[0]} -> {parts[1]}"')
 
+    def board_view(self, board):
+        mid_line = '-' * 34
+        view = f'\n{mid_line}\n'
+        for i, row in enumerate(board):
+            view = f"{view}{8 - i}| "
+            for figure in row:
+                if figure is None:
+                    symbol = ' '
+                else:
+                    symbol = TEXT_FIGURES[figure.color][figure.__class__]
+                view = f"{view}{symbol} | "
+            view = f"{view}\n{mid_line}\n"
+        view = f"{view}   {' * '.join('ABCDEFGH')}"
+        return view
 
     def show_help(self):
         print(self.HINT)
 
     def start(self):
         while True:
+            print(self.board_view(self._ctrl.show_board(self._curr_board_id)))
             self._get_command()

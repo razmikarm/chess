@@ -4,7 +4,7 @@ class Colors:
     BLACK = 1
 
 
-ColorNames = {
+COLOR_NAMES = {
     0: 'White',
     1: 'Black',
 }
@@ -63,19 +63,8 @@ class Validator:
         return True
     
     @classmethod
-    def convert_id(cls, value):
-        if isinstance(value, UUID):
-            return value
-        if not isinstance(value, str):
-            return
-        try:
-            return UUID(value)
-        except ValueError:
-            return
-    
-    @classmethod
     def convert_column(cls, column):
-        if not cls.is_valid_column(column_number):
+        if not cls.is_valid_column(column):
             return None
         if isinstance(column, str):
             return cls._letters.find(column)

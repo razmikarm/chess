@@ -14,15 +14,18 @@ class Controller:
             return
         if not (board := self.boards.get(board_id)):
             return
-        if not Validator.is_valid_cellname(from_cell):
+        if not Validator.is_valid_cellname(from_cell.upper()):
             return
-        if not Validator.is_valid_cellname(to_cell):
+        if not Validator.is_valid_cellname(to_cell.upper()):
             return
-        from_pos = Validator.cellname_to_pos(from_cell)
-        to_pos = Validator.cellname_to_pos(to_cell)
+        from_pos = Validator.cellname_to_pos(from_cell.upper())
+        to_pos = Validator.cellname_to_pos(to_cell.upper())
+        if from_pos == to_pos:
+            return
         state = board.make_move(from_pos, to_pos)
         if board.loser:
             self.game_over(board)
+        return state
 
     def game_over(self, board):
         pass # TODO: Implement actions when the game is over | loser can be accessed by board.loser
@@ -50,3 +53,14 @@ class Controller:
         if not self.boards.get(board_id):
             return
         return self.boards[board_id].state
+
+    @staticmethod
+    def convert_id(value):
+        if isinstance(value, UUID):
+            return value
+        if not isinstance(value, str):
+            return
+        try:
+            return UUID(value)
+        except ValueError:
+            return
