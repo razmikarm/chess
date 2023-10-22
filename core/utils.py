@@ -1,12 +1,12 @@
 class Colors:
 
-    WHITE = 'White'
-    BLACK = 'Black'
+    WHITE = 0
+    BLACK = 1
 
 
-ColorsDict = {
-    0: Colors.WHITE,
-    1: Colors.BLACK,
+ColorNames = {
+    0: 'White',
+    1: 'Black',
 }
 
 

@@ -1,4 +1,4 @@
-from.utils import Colors, ColorsDict
+from.utils import Colors, ColorNames
 from .figure import WHITES_ORDER, BLACKS_ORDER, PAWNS, King
 
 class Board:
@@ -14,7 +14,7 @@ class Board:
 
     @property
     def turn(self):
-        return ColorsDict[self._turn]
+        return ColorNames[self._turn]
 
     def set_up(self):
         self.__matrix[0] = [cls(Colors.BLACK) for cls in BLACKS_ORDER]
