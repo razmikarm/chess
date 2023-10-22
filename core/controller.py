@@ -18,8 +18,7 @@ class Controller:
             return
         from_pos = self.cellname_to_pos(from_cell)
         to_pos = self.cellname_to_pos(to_cell)
-        if board.make_move(from_pos, to_pos):
-            self._turn = not self._turn
+        board.make_move(from_pos, to_pos)
         return board.state
 
     def run(self):

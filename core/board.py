@@ -25,10 +25,12 @@ class Board:
         from_row, from_column = from_pos 
         to_row, to_column = to_pos 
         figure = self.__matrix[from_row][from_column]
+        if self.turn != figure.color:
+            return
         if figure.check_move(from_pos, to_pos, self.state):
             self.__matrix[from_row][from_column] = None
             self.__matrix[to_row][to_column] = figure
-            return True
+            self._turn = not self._turn
 
     @property
     def id(self):
