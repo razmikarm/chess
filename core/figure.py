@@ -264,12 +264,16 @@ class Knight(Figure):
 
     @staticmethod
     def possible_moves(curr_pos):
-        pass
+        curr_row, curr_column = curr_pos
+        up = [(curr_row + 2, curr_column - 1), (curr_row + 2, curr_column + 1)]
+        down = [(curr_row - 2, curr_column - 1), (curr_row - 2, curr_column + 1)]
+        left = [(curr_row - 1, curr_column - 2), (curr_row + 1, curr_column - 2)]
+        right = [(curr_row - 1, curr_column + 2), (curr_row + 1, curr_column + 2)]
+        moves = up + down + left + right
+        return [pos for pos in moves if Validator.is_valid_pos(pos)]
 
     def check_move(self, curr_pos, new_pos, board):
-        curr_row, curr_column = curr_pos
-        new_row, new_column = new_pos
-        ...
+        board = self.make_move(curr_pos, new_pos, board)
         return King.check_for_check(self.color, board)
 
 
