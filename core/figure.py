@@ -24,12 +24,12 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
         pass
 
     @abstractstaticmethod
-    def possible_moves(curr_pos):
+    def possible_moves(curr_pos, color=None):
         pass
 
-    def available_moves(self, curr_pos, board):
+    def available_moves(self, curr_pos, board, color=None):
         """Returns all available positions to move as generator"""
-        possible_moves = self.possible_moves(curr_pos)
+        possible_moves = self.possible_moves(curr_pos, color)
         for pos in possible_moves:
             row, col = pos
             figure = board[row][col]
@@ -70,7 +70,7 @@ class King(Figure):
         return self.check_for_check(self.color, board)
 
     @staticmethod
-    def possible_moves(curr_pos):
+    def possible_moves(curr_pos, color=None):
         curr_row, curr_column = curr_pos
         up = [(curr_row - 1, curr_column + i) for i in range(-1, 2)]
         curr = [(curr_row, curr_column + i) for i in range(-1, 2)]
@@ -150,9 +150,9 @@ class Queen(Figure):
         self.type = PieceTypes.QUEEN
 
     @staticmethod
-    def possible_moves(curr_pos):
-        moves = Rook.possible_moves(curr_pos)
-        moves += Bishop.possible_moves(curr_pos)
+    def possible_moves(curr_pos, color=None):
+        moves = Rook.possible_moves(curr_pos, color)
+        moves += Bishop.possible_moves(curr_pos, color)
         return moves
 
     def check_move(self, curr_pos, new_pos, board):
@@ -177,7 +177,7 @@ class Rook(Figure):
         self.type = PieceTypes.ROOK
 
     @staticmethod
-    def possible_moves(curr_pos):
+    def possible_moves(curr_pos, color=None):
         curr_row, curr_column = curr_pos
         moves = [(i, curr_column) for i in range(8)]
         moves += [(curr_row, i) for i in range(8)]
@@ -225,7 +225,7 @@ class Bishop(Figure):
         self.type = PieceTypes.BISHOP
 
     @staticmethod
-    def possible_moves(curr_pos):
+    def possible_moves(curr_pos, color=None):
         curr_row, curr_column = curr_pos
         asc_column_start = curr_column - curr_row
         desc_column_start = curr_column + curr_row
@@ -280,7 +280,7 @@ class Knight(Figure):
         self.type = PieceTypes.KNIGHT
 
     @staticmethod
-    def possible_moves(curr_pos):
+    def possible_moves(curr_pos, color=None):
         curr_row, curr_column = curr_pos
         up = [(curr_row + 2, curr_column - 1), (curr_row + 2, curr_column + 1)]
         down = [(curr_row - 2, curr_column - 1), (curr_row - 2, curr_column + 1)]
@@ -290,7 +290,7 @@ class Knight(Figure):
         return [pos for pos in moves if Validator.is_valid_pos(pos)]
 
     def check_move(self, curr_pos, new_pos, board):
-        if new_pos not in self.possible_moves(curr_pos):
+        if new_pos not in self.possible_moves(curr_pos, self.color):
             return False
         board = self.make_move(curr_pos, new_pos, board)
         return King.check_for_check(self.color, board)
@@ -303,12 +303,33 @@ class Pawn(Figure):
         self.type = PieceTypes.PAWN
 
     @staticmethod
-    def possible_moves(curr_pos):
-        pass
+    def possible_moves(curr_pos, color=None):
+        if color is None:
+            return []
+        curr_row, curr_column = curr_pos
+        is_new_black = color == 1 and curr_row == 1
+        is_new_white = color == 0 and curr_row == 6
+        moves = [
+            (curr_row - (-1) ** color, curr_column),
+            (curr_row - (-1) ** color, curr_column - 1),
+            (curr_row - (-1) ** color, curr_column + 1),
+        ]
+        if is_new_black or is_new_white:
+            moves.append((curr_row - (2 * (-1) ** color), curr_column))
+        # TODO: Need to add checker for `en passant`
+        return [pos for pos in moves if Validator.is_valid_pos(pos)]
 
     def check_move(self, curr_pos, new_pos, board):
         curr_row, curr_column = curr_pos
         new_row, new_column = new_pos
+        possibles = self.possible_moves(curr_pos, self.color)
+        acceptables = []
+        for pos in possibles:
+            if ((board[p[0]][p[1]] is not None and p[1] != curr_column) or
+                (board[p[0]][p[1]] is None and p[1] == curr_column)):
+                acceptables.append(pos)
+        if new_pos not in acceptables:
+            return False
         
         board = self.make_move(curr_pos, new_pos, board)
         return King.check_for_check(self.color, board)
