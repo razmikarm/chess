@@ -10,103 +10,83 @@ class PieceTypes:
     PAWN = 'pawn'
 
 
-class Figure(metaclass=ABCMeta):
+class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
 
     @abstractmethod
-    def __init__(self, color, pos, board):
+    def __init__(self, color):
         self.color = color
-        self.pos = pos
-        self.is_onboard = True
         self.type = None
 
     @abstractmethod
-    def check_move(self, pos):
+    def check_move(self, curr_pos, new_pos, board):
         pass
 
-    @abstractmethod
-    def make_move(self, pos):
-        pass
+    def __str__(self):
+        return f"{self.color} {self.type}"
 
 
 class King(Figure):
 
-    def __init__(self, color, pos, board):
-        super().__init__(color, pos, board)
+    def __init__(self, color):
+        super().__init__(color)
         self.type = PieceTypes.KING
 
-    def check_move(self, pos):
-        pass
-
-    def make_move(self, pos):
+    def check_move(self, curr_pos, new_pos, board):
         pass
 
 
 class Queen(Figure):
 
-    def __init__(self, color, pos, board):
-        super().__init__(color, pos, board)
+    def __init__(self, color):
+        super().__init__(color)
         self.type = PieceTypes.QUEEN
 
-    def check_move(self, pos):
-        pass
-
-    def make_move(self, pos):
+    def check_move(self, curr_pos, new_pos, board):
         pass
 
 
 class Rook(Figure):
 
-    def __init__(self, color, pos, board):
-        super().__init__(color, pos, board)
+    def __init__(self, color):
+        super().__init__(color)
         self.type = PieceTypes.ROOK
 
-    def check_move(self, pos):
-        pass
-
-    def make_move(self, pos):
+    def check_move(self, curr_pos, new_pos, board):
         pass
 
 
 class Bishop(Figure):
 
-    def __init__(self, color, pos, board):
-        super().__init__(color, pos, board)
+    def __init__(self, color):
+        super().__init__(color)
         self.type = PieceTypes.BISHOP
 
-    def check_move(self, pos):
-        pass
-
-    def make_move(self, pos):
+    def check_move(self, curr_pos, new_pos, board):
         pass
 
 
 class Knight(Figure):
 
-    def __init__(self, color, pos, board):
-        super().__init__(color, pos, board)
+    def __init__(self, color):
+        super().__init__(color)
         self.type = PieceTypes.KNIGHT
 
-    def check_move(self, pos):
-        pass
-
-    def make_move(self, pos):
+    def check_move(self, curr_pos, new_pos, board):
         pass
 
 
 class Pawn(Figure):
 
-    def __init__(self, color, pos, board):
-        super().__init__(color, pos, board)
+    def __init__(self, color):
+        super().__init__(color)
         self.type = PieceTypes.PAWN
 
-    def check_move(self, pos):
-        pass
-
-    def make_move(self, pos):
+    def check_move(self, curr_pos, new_pos, board):
         pass
 
 LEFT_SIDE = [Rook, Knight, Bishop]
 RIGHT_SIDE = LEFT_SIDE[::-1]
 
-WHITE_ORDER = LEFT_SIDE + [Queen, King] + RIGHT_SIDE
-BLACK_ORDER = LEFT_SIDE + [King, Queen] + RIGHT_SIDE
+WHITES_ORDER = LEFT_SIDE + [Queen, King] + RIGHT_SIDE
+BLACKS_ORDER = LEFT_SIDE + [King, Queen] + RIGHT_SIDE
+PAWNS = [Pawn] * 8
