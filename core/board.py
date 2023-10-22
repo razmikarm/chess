@@ -1,5 +1,5 @@
 from.utils import Colors, ColorsDict
-from .figure import WHITES_ORDER, BLACKS_ORDER, PAWNS
+from .figure import WHITES_ORDER, BLACKS_ORDER, PAWNS, King
 
 class Board:
 
@@ -10,6 +10,7 @@ class Board:
         self._turn = 0
 
         self.set_up()
+        self.loser = None
 
     @property
     def turn(self):
@@ -31,7 +32,11 @@ class Board:
             self.__matrix[from_row][from_column] = None
             self.__matrix[to_row][to_column] = figure
             self._turn = not self._turn
+            self.check_for_mate()
             return self.state
+
+    def check_for_mate(self):
+        self.loser = King.check_for_mate(self.state)
 
     @property
     def id(self):
