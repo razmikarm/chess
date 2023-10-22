@@ -23,10 +23,6 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
     def check_move(self, curr_pos, new_pos, board):
         pass
 
-    @abstractmethod
-    def available_moves(self, curr_pos, board):
-        pass
-
     @abstractstaticmethod
     def possible_moves(curr_pos):
         pass
