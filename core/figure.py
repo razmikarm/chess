@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractstaticmethod
 from .utils import Validator
 
+
 class PieceTypes:
 
     KING = 'king'
@@ -41,7 +42,6 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
             if self.check_move(curr_pos, pos, board):
                 yield pos
 
-
     def make_move(self, curr_pos, new_pos, board):
         board = [row.copy() for row in board]
         curr_row, curr_column = curr_pos
@@ -81,7 +81,6 @@ class King(Figure):
         down = [(curr_row + 1, curr_column + i) for i in range(-1, 2)]
         moves = up + down + curr
         return [pos for pos in moves if Validator.is_valid_pos(pos)]
-
 
     @staticmethod
     def collect_board_data(color, board):
@@ -148,7 +147,6 @@ class King(Figure):
         return color
 
 
-
 class Queen(Figure):
 
     def __init__(self, color):
@@ -157,10 +155,16 @@ class Queen(Figure):
 
     @staticmethod
     def possible_moves(curr_pos):
-        pass
+        moves = Rook.possible_moves(curr_pos)
+        moves += Bishop.possible_moves(curr_pos)
 
     def check_move(self, curr_pos, new_pos, board):
-        pass
+        cells = Rook.get_cells_btw(curr_pos, new_pos, board)
+        cells += Bishop.get_cells_btw(curr_pos, new_pos, board)
+        if any(cells):
+            return False
+        board = self.make_move(curr_pos, new_pos, board)
+        return King.check_for_check(self.color, board)
 
 
 class Rook(Figure):
