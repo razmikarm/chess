@@ -1,3 +1,5 @@
+import os
+
 from .figure import TEXT_FIGURES
 
 class PromptCLI:
@@ -9,7 +11,6 @@ class PromptCLI:
         "To see all boards enter 'boards'\n"
         "To start new board enter 'new-board'\n"
         "To see current board id enter 'current'\n"
-        "To see current board state enter 'show'\n"
         "To remove the board enter 'remove-board <board id>'\n"
         "To choose the board enter 'set-board <board id>'\n"
         "\n"
@@ -32,11 +33,10 @@ class PromptCLI:
             'remove-board': self._ctrl.end_board,
         }
         self._show_commands = {
-            'show' : lambda: self.board_view(self._ctrl.show_board(self._curr_board_id)),
-            'current': lambda: self._curr_board_id,
-            'help': lambda: self.HINT,
-            'boards': self._ctrl.all_boards,
+            'help': self.show_help,
             'new-board': self._ctrl.start_new_board,
+            'current': lambda: print(self._curr_board_id),
+            'boards': lambda: print(self._ctrl.all_boards),
         }
 
     def set_current_board(self, board_id):
@@ -45,12 +45,13 @@ class PromptCLI:
     def _get_command(self):
         print("\nTo see all commands enter 'help'")
         command = input('Please, enter your command: ').lower()
+        self.clear()
         parts = command.strip().split()
         if not parts:
             return
         main = parts[0]
         if (func := self._show_commands.get(main)):
-            return print(func())
+            return func()
         if len(parts) != 2:
             print('Invalid command!')
             return
@@ -59,9 +60,11 @@ class PromptCLI:
             return func(board_id)
         cur_state = self._ctrl.make_move(self._curr_board_id, *parts)
         if not cur_state:
-            print(f'Invalid move "{parts[0]} -> {parts[1]}"')
+            print(f'Invalid move "{parts[0].upper()} -> {parts[1].upper()}"')
 
-    def board_view(self, board):
+    def show_board(self, board=None):
+        if board is None:
+            board = self._ctrl.show_board(self._curr_board_id)
         mid_line = '-' * 34
         view = f'\n{mid_line}\n'
         for i, row in enumerate(board):
@@ -74,12 +77,19 @@ class PromptCLI:
                 view = f"{view}{symbol} | "
             view = f"{view}\n{mid_line}\n"
         view = f"{view}   {' * '.join('ABCDEFGH')}"
+        print(view)
         return view
+
+    def clear(self):
+        if os.name == 'posix':
+            os.system("clear")
+        else:
+            os.system("cls")
 
     def show_help(self):
         print(self.HINT)
 
     def start(self):
         while True:
-            print(self.board_view(self._ctrl.show_board(self._curr_board_id)))
+            self.show_board()
             self._get_command()

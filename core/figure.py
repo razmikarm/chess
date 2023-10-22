@@ -324,10 +324,10 @@ class Pawn(Figure):
         new_row, new_column = new_pos
         possibles = self.possible_moves(curr_pos, self.color)
         acceptables = []
-        for pos in possibles:
+        for p in possibles:
             if ((board[p[0]][p[1]] is not None and p[1] != curr_column) or
                 (board[p[0]][p[1]] is None and p[1] == curr_column)):
-                acceptables.append(pos)
+                acceptables.append(p)
         if new_pos not in acceptables:
             return False
         
