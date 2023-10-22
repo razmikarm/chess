@@ -1,14 +1,33 @@
+from uuid import uuid4
+
+from .board import Board
+from .utils import Colors
+
 class Controller:
 
     def __init__(self):
+        self.boards = {}
         self._letters = ' ABCDEFGH'
-        self._colors = {
-            0: 'WHITE',
-            1: 'BLACK',
-        }
 
-    def start(self):
-        pass
+    def make_move(self, board_id, from_cell, to_cell):
+        if not (board := Board.get(board_id)):
+            return
+        if not self.is_valid_cellname(from_cell):
+            return
+        if not self.is_valid_cellname(to_cell):
+            return
+        from_pos = self.cellname_to_pos(from_cell)
+        to_pos = self.cellname_to_pos(to_cell)
+        if board.make_move(from_pos, to_pos):
+            self._turn = not self._turn
+        return board.state
+
+    def run(self):
+        self.start_new_board()
+
+    def start_new_board(self):
+        new_id = uuid4()
+        self.boards[new_id] = Board(new_id)
 
     def is_valid_cellname(self, cellname):
         if not isinstance(cellname, str):
