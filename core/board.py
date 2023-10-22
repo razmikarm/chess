@@ -31,6 +31,7 @@ class Board:
             self.__matrix[from_row][from_column] = None
             self.__matrix[to_row][to_column] = figure
             self._turn = not self._turn
+            return self.state
 
     @property
     def id(self):
