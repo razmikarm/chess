@@ -9,9 +9,9 @@ class PromptCLI:
         "To see all boards enter 'boards'\n"
         "To start new board enter 'new-board'\n"
         "To see current board id enter 'current'\n"
+        "To see current board state enter 'show'\n"
         "To remove the board enter 'remove-board <board id>'\n"
         "To choose the board enter 'set-board <board id>'\n"
-        "To see the board state enter 'show <board id>'\n"
         "\n"
         "To make move enter '<FROM> <TO>', where\n"
         "<FROM> and <TO> should be represented as cellname\n\n"
@@ -30,9 +30,9 @@ class PromptCLI:
         self._base_commands = {
             'set-board': self.set_current_board,
             'remove-board': self._ctrl.end_board,
-            'show' : self._ctrl.show_board,
         }
         self._show_commands = {
+            'show' : lambda: self._ctrl.show_board(self._curr_board_id),
             'current': lambda: self._curr_board_id,
             'help': lambda: self.HINT,
             'boards': self._ctrl.all_boards,
@@ -56,9 +56,6 @@ class PromptCLI:
             return
         if (func := self._base_commands.get(main)):
             board_id = parts[1]
-            if not self._ctrl.boards.get(board_id):
-                print(f'Board with id "{board_id}" was not found')
-                return
             return func(board_id)
         cur_state = self._ctrl.make_move(self._curr_board_id, *parts)
         if not cur_state:
