@@ -206,9 +206,5 @@ class Pawn(Figure):
     def check_move(self, curr_pos, new_pos, board):
         pass
 
-LEFT_SIDE = [Rook, Knight, Bishop]
-RIGHT_SIDE = LEFT_SIDE[::-1]
-
-WHITES_ORDER = LEFT_SIDE + [Queen, King] + RIGHT_SIDE
-BLACKS_ORDER = LEFT_SIDE + [King, Queen] + RIGHT_SIDE
+ORDER = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 PAWNS = [Pawn] * 8

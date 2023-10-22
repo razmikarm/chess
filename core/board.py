@@ -1,5 +1,5 @@
 from.utils import Colors, ColorNames
-from .figure import WHITES_ORDER, BLACKS_ORDER, PAWNS, King
+from .figure import ORDER, PAWNS, King
 
 class Board:
 
@@ -17,10 +17,10 @@ class Board:
         return ColorNames[self._turn]
 
     def set_up(self):
-        self.__matrix[0] = [cls(Colors.BLACK) for cls in BLACKS_ORDER]
-        self.__matrix[7] = [cls(Colors.WHITE) for cls in WHITES_ORDER]
+        self.__matrix[0] = [cls(Colors.BLACK) for cls in ORDER]
         self.__matrix[1] = [cls(Colors.BLACK) for cls in PAWNS]
         self.__matrix[6] = [cls(Colors.WHITE) for cls in PAWNS]
+        self.__matrix[7] = [cls(Colors.WHITE) for cls in ORDER]
 
     def make_move(self, from_pos, to_pos):
         from_row, from_column = from_pos 
