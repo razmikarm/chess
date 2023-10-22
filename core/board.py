@@ -1,5 +1,5 @@
 from.utils import Colors, COLOR_NAMES
-from .figure import ORDER, PAWNS, King
+from .figure import ORDER, PAWNS, Figure
 
 class Board:
 
@@ -37,7 +37,7 @@ class Board:
         if new_cell and new_cell.color == figure.color:
             print("Can't move on busy cell")
             return
-        if figure.check_move(from_pos, to_pos, self.state):
+        if figure.can_move(from_pos, to_pos, self.state):
             self.__matrix[to_row][to_column] = figure
             self.__matrix[from_row][from_column] = None
             self._turn = not self._turn
@@ -46,7 +46,7 @@ class Board:
             return self.state
 
     def check_for_mate(self):
-        self.loser = King.check_for_mate(self.state)
+        self.loser = Figure.check_for_mate(self._turn, self.state)
 
     @property
     def id(self):
