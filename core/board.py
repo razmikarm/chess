@@ -8,6 +8,7 @@ class Board:
         self.__id = id
         self.__matrix = [[None] * 8 for i in range(8)]
         self._turn = 0
+        self.__history = []
 
         self.set_up()
         self.loser = None
@@ -35,6 +36,7 @@ class Board:
             self.__matrix[to_row][to_column] = figure
             self.__matrix[from_row][from_column] = None
             self._turn = not self._turn
+            self.__history.append((from_pos, to_pos))
             self.check_for_mate()
             return self.state
 
@@ -48,3 +50,7 @@ class Board:
     @property
     def state(self):
         return [row.copy() for row in self.__matrix]
+
+    @property
+    def history(self):
+        return self.__history
