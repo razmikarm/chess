@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 from .board import Board
 from .utils import Colors
@@ -10,7 +10,10 @@ class Controller:
         self._letters = ' ABCDEFGH'
 
     def make_move(self, board_id, from_cell, to_cell):
-        if not (board := Board.get(board_id)):
+        board_id = self.convert_id(board_id)
+        if not board_id:
+            return
+        if not (board := self.boards.get(board_id)):
             return
         if not self.is_valid_cellname(from_cell):
             return
@@ -18,15 +21,31 @@ class Controller:
             return
         from_pos = self.cellname_to_pos(from_cell)
         to_pos = self.cellname_to_pos(to_cell)
-        board.make_move(from_pos, to_pos)
-        return board.state
-
-    def run(self):
-        self.start_new_board()
+        return board.make_move(from_pos, to_pos)
 
     def start_new_board(self):
         new_id = uuid4()
         self.boards[new_id] = Board(new_id)
+        return new_id
+
+    def end_board(self, board_id):
+        board_id = self.convert_id(board_id)
+        if not board_id:
+            return
+        if not self.boards.get(board_id):
+            return
+        return self.boards.pop(board_id)
+
+    def all_boards(self):
+        return list(self.boards.keys())
+
+    def show_board(self, board_id):
+        board_id = self.convert_id(board_id)
+        if not board_id:
+            return
+        if not self.boards.get(board_id):
+            return
+        return self.boards[board_id].state
 
     def is_valid_cellname(self, cellname):
         if not isinstance(cellname, str):
@@ -71,6 +90,16 @@ class Controller:
         if not (0 < column < 9):
             return False 
         return True
+    
+    def convert_id(self, value):
+        if isinstance(value, UUID):
+            return value
+        if not isinstance(value, str):
+            return
+        try:
+            return UUID(value)
+        except ValueError:
+            return
     
     def convert_column(self, column):
         if not self.is_valid_column(column_number):
