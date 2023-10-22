@@ -27,15 +27,28 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
         pass
 
     @abstractstaticmethod
-    def _possible_moves(curr_pos):
+    def possible_moves(curr_pos):
         pass
 
     def available_moves(self, curr_pos, board):
         """Returns all available positions to move as generator"""
-        possible_moves = self._possible_moves(curr_pos)
+        possible_moves = self.possible_moves(curr_pos)
         for pos in possible_moves:
+            row, col = pos
+            figure = board[row][col]
+            if figure and figure.color == self.color:
+                continue
             if self.check_move(curr_pos, pos, board):
                 yield pos
+
+
+    def make_move(self, curr_pos, new_pos, board):
+        board = [row.copy() for row in board]
+        curr_row, curr_column = curr_pos
+        new_row, new_column = new_pos
+        board[new_row][new_column] = self
+        board[curr_row][curr_column] = None
+        return board
 
     def __str__(self):
         return f"{self.color} {self.type}"
@@ -57,18 +70,17 @@ class King(Figure):
         if not (abs(curr_row - new_row) <= 1 and 
                 abs(curr_column - new_column) <= 1):
                 return False
-        baord = [row.copy() for row in board]
-        board[new_row][new_column] = self
-        board[curr_row][curr_column] = None
+        board = self.make_move(curr_pos, new_pos, board)
         return self.check_for_check(self.color, board)
 
     @staticmethod
-    def _possible_moves(curr_pos):
+    def possible_moves(curr_pos):
         curr_row, curr_column = curr_pos
         up = [(curr_row - 1, curr_column + i) for i in range(-1, 2)]
-        down = [(curr_row + 1, curr_column + i) for i in range(-1, 2)]
         curr = [(curr_row, curr_column + i) for i in range(-1, 2)]
-        return [pos for pos in up + down + curr if Validator.is_valid_pos(pos)]
+        down = [(curr_row + 1, curr_column + i) for i in range(-1, 2)]
+        moves = up + down + curr
+        return [pos for pos in moves if Validator.is_valid_pos(pos)]
 
 
     @staticmethod
@@ -144,7 +156,7 @@ class Queen(Figure):
         self.type = PieceTypes.QUEEN
 
     @staticmethod
-    def _possible_moves(curr_pos):
+    def possible_moves(curr_pos):
         pass
 
     def check_move(self, curr_pos, new_pos, board):
@@ -158,11 +170,37 @@ class Rook(Figure):
         self.type = PieceTypes.ROOK
 
     @staticmethod
-    def _possible_moves(curr_pos):
-        pass
+    def possible_moves(curr_pos):
+        curr_row, curr_column = curr_pos
+        moves = [(i, curr_column) for i in range(8)]
+        moves += [(curr_row, i) for i in range(8)]
+        return moves
+
+    @staticmethod
+    def get_cells_btw(curr_pos, new_pos, board):
+        curr_row, curr_column = curr_pos
+        new_row, new_column = new_pos
+        if curr_column == new_column:
+            test_board = list(zip(*board))
+            curr, new = curr_row, new_row
+            row = curr_column
+        elif curr_row == new_row:
+            test_board = board
+            curr, new = curr_column, new_column
+            row = curr_row
+        else:
+            return []
+        if curr < new:
+            low, high = curr, new
+        else:
+            low, high = new, curr
+        return test_board[row][low + 1:high]
 
     def check_move(self, curr_pos, new_pos, board):
-        pass
+        if any(self.get_cells_btw(curr_pos, new_pos, board)):
+            return False
+        board = self.make_move(curr_pos, new_pos, board)
+        return King.check_for_check(self.color, board)
 
 
 class Bishop(Figure):
@@ -172,11 +210,46 @@ class Bishop(Figure):
         self.type = PieceTypes.BISHOP
 
     @staticmethod
-    def _possible_moves(curr_pos):
-        pass
+    def possible_moves(curr_pos):
+        curr_row, curr_column = curr_pos
+        asc_column_start = curr_column - curr_row
+        desc_column_start = curr_column + curr_row
+        moves = []
+        for row in range(8):
+            if row == curr_row:
+                continue
+            asc_pos = asc_column_start + row, row
+            desc_pos = asc_column_start - row, row
+            if Validator.is_valid_pos(asc_pos):
+                moves.append(asc_pos)
+            if Validator.is_valid_pos(desc_pos):
+                moves.append(desc_pos)
+        return moves
+
+    @staticmethod
+    def get_cells_btw(curr_pos, new_pos, board):
+        curr_row, curr_column = curr_pos
+        new_row, new_column = new_pos
+        col_diff = abs(curr_column - new_column)
+        row_diff = abs(curr_row - new_row)
+        if col_diff != row_diff:
+            return []
+        # Row icrementing index
+        rii = (-1) ** (curr_row > new_row)
+        # Column icrementing index
+        cii = (-1) ** (curr_column > new_column)
+        result = []
+        for i in range(row_diff):
+            col = curr_column + i * cii
+            row = curr_row + i * rii
+            result.append(board[row][col])
+        return result
 
     def check_move(self, curr_pos, new_pos, board):
-        pass
+        if any(self.get_cells_btw(curr_pos, new_pos, board)):
+            return False
+        board = self.make_move(curr_pos, new_pos, board)
+        return King.check_for_check(self.color, board)
 
 
 class Knight(Figure):
@@ -186,11 +259,14 @@ class Knight(Figure):
         self.type = PieceTypes.KNIGHT
 
     @staticmethod
-    def _possible_moves(curr_pos):
+    def possible_moves(curr_pos):
         pass
 
     def check_move(self, curr_pos, new_pos, board):
-        pass
+        curr_row, curr_column = curr_pos
+        new_row, new_column = new_pos
+        ...
+        return King.check_for_check(self.color, board)
 
 
 class Pawn(Figure):
@@ -200,11 +276,14 @@ class Pawn(Figure):
         self.type = PieceTypes.PAWN
 
     @staticmethod
-    def _possible_moves(curr_pos):
+    def possible_moves(curr_pos):
         pass
 
     def check_move(self, curr_pos, new_pos, board):
-        pass
+        curr_row, curr_column = curr_pos
+        new_row, new_column = new_pos
+        ...
+        return King.check_for_check(self.color, board)
 
 ORDER = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 PAWNS = [Pawn] * 8

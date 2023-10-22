@@ -15,7 +15,7 @@ class Validator:
     _letters = ' ABCDEFGH'
 
     @classmethod
-    def is_valid_cellname(cls, cellname):
+    def is_valid_cellname(cls, cellname) -> bool:
         if not isinstance(cellname, str):
             return False
         if len(cellname) != 2:
@@ -27,7 +27,7 @@ class Validator:
         return True
 
     @classmethod
-    def is_valid_pos(cls, pos):
+    def is_valid_pos(cls, pos) -> bool:
         if not isinstance(pos, (tuple, list)):
             return False
         if len(pos) != 2:
