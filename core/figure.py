@@ -24,6 +24,9 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
     def __str__(self):
         return f"{self.color} {self.type}"
 
+    def __repr__(self):
+        return f"{self.color} {self.type}"
+
 
 class King(Figure):
 
