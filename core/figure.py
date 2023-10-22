@@ -29,6 +29,10 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
         pass
 
     def can_move(self, curr_pos, new_pos, board):
+        new_row, new_column = new_pos
+        figure = board[new_row][new_column]
+        if figure is not None and self.color == figure.color:
+            return False
         if not self.is_available_move(curr_pos, new_pos, board):
             return False
         board = self.make_move(curr_pos, new_pos, board)
@@ -83,7 +87,6 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
 
         if (abs(my_king_pos[0] - opp_king_pos[0]) <= 1 and
                 abs(my_king_pos[1] - opp_king_pos[1]) <= 1):
-                print('King is under attack!')
                 return False
         for pos, figure in opponent_figures.items():
             if figure.is_available_move(pos, my_king_pos, board):
@@ -97,19 +100,19 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
         
         my_figures = data['my_figures']
         my_king_pos = data['my_king_pos']
-        opp_king_pos = data['opp_king_pos']
-        opponent_figures = data['opponent_figures']
 
-        if not Figure.is_not_check(color, board, cache=data):
-            return False
+        if Figure.is_not_check(color, board, cache=data):
+            return
 
         my_king = board[my_king_pos[0]][my_king_pos[1]]
-        if my_king.available_moves(my_king_pos, board):
-            return False
-        
+        for pos in my_king.possible_moves(my_king_pos, color):
+            if my_king.can_move(my_king_pos, pos, board):
+                return
+
         for curr_pos, figure in my_figures.items():
-            if figure.available_moves(curr_pos, board):
-                return False
+            for pos in figure.possible_moves(curr_pos, color):
+                if figure.can_move(curr_pos, pos, board):
+                    return
 
         return color
 

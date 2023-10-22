@@ -7,13 +7,14 @@ class Controller:
 
     def __init__(self):
         self.boards = {}
+        self.finished = {}
 
     def make_move(self, board_id, from_cell, to_cell):
         board_id = self.convert_id(board_id)
         if not board_id:
             return
         if not (board := self.boards.get(board_id)):
-            return
+                return self.game_stat(board_id)
         if not Validator.is_valid_cellname(from_cell.upper()):
             return
         if not Validator.is_valid_cellname(to_cell.upper()):
@@ -23,13 +24,22 @@ class Controller:
         if from_pos == to_pos:
             return
         state = board.make_move(from_pos, to_pos)
-        if board.loser:
+        if board.loser is not None:
+            print("The game is over")
             self.game_over(board)
+            return self.game_stat(board_id)
         return state
 
-    def game_over(self, board):
-        pass # TODO: Implement actions when the game is over | loser can be accessed by board.loser
+    def game_stat(self, board_id):
+        return self.finished.get(board_id)
 
+    def game_over(self, board):
+        self.finished[board.id] = {
+            'winner': not board.loser,
+            'history': board.history,
+        }
+        self.end_board(board.id)
+        
     def start_new_board(self):
         new_id = uuid4()
         self.boards[new_id] = Board(new_id)

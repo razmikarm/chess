@@ -1,6 +1,7 @@
 import os
 
 from .figure import TEXT_FIGURES
+from .utils import COLOR_NAMES, Validator
 
 class PromptCLI:
 
@@ -36,7 +37,7 @@ class PromptCLI:
             'help': self.show_help,
             'new-board': self._ctrl.start_new_board,
             'current': lambda: print(self._curr_board_id),
-            'boards': lambda: print(self._ctrl.all_boards),
+            'boards': lambda: print(self._ctrl.all_boards()),
         }
 
     def set_current_board(self, board_id):
@@ -59,12 +60,24 @@ class PromptCLI:
             board_id = parts[1]
             return func(board_id)
         cur_state = self._ctrl.make_move(self._curr_board_id, *parts)
-        if not cur_state:
-            print(f'Invalid move "{parts[0].upper()} -> {parts[1].upper()}"')
+        if isinstance(cur_state, dict):
+            print('Game is over!')
+            print(f"{COLOR_NAMES[cur_state['winner']]} player won")
+            print("Game history:")
+            for i, move in enumerate(cur_state['history'], start=1):
+                from_pos, to_pos = move
+                from_cell = Validator.pos_to_cellname(from_pos)
+                to_cell = Validator.pos_to_cellname(to_pos)
+                print(f"{i:02} ) {from_cell} -> {to_cell}")
+        # if not cur_state:
+        #     print(f'Invalid move "{parts[0].upper()} -> {parts[1].upper()}"')
 
     def show_board(self, board=None):
         if board is None:
             board = self._ctrl.show_board(self._curr_board_id)
+        if board is None:
+            print('Start new board')
+            return
         mid_line = '-' * 34
         view = f'\n{mid_line}\n'
         for i, row in enumerate(board):

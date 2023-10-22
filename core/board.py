@@ -42,7 +42,7 @@ class Board:
             self.__matrix[from_row][from_column] = None
             self._turn = not self._turn
             self.__history.append((from_pos, to_pos))
-            # self.check_for_mate()
+            self.check_for_mate()
             return self.state
 
     def check_for_mate(self):
