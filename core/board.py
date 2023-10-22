@@ -28,9 +28,12 @@ class Board:
         figure = self.__matrix[from_row][from_column]
         if self.turn != figure.color:
             return
+        new_cell = self.__matrix[to_row][to_column]
+        if new_cell and new_cell.color == figure.color:
+            return
         if figure.check_move(from_pos, to_pos, self.state):
-            self.__matrix[from_row][from_column] = None
             self.__matrix[to_row][to_column] = figure
+            self.__matrix[from_row][from_column] = None
             self._turn = not self._turn
             self.check_for_mate()
             return self.state
