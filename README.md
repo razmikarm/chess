@@ -5,7 +5,7 @@ Here is only implemented the CLI part, but in its core it has an ability to bein
 
 The core controller uses `UUID`s to distinguish boards, but thinking about replacing `UUID`s with random funny names.
 
-P.S. still need to implement timer and [en passant](https://en.wikipedia.org/wiki/En_passant)
+P.S. still need to implement timer, [Castling](https://en.wikipedia.org/wiki/Castling) and [en passant](https://en.wikipedia.org/wiki/En_passant)
 
 #### HOW
 
