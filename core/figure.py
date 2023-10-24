@@ -1,15 +1,15 @@
-from abc import ABCMeta, abstractmethod, abstractstaticmethod
-from .utils import Validator, COLOR_NAMES
+from abc import ABCMeta, abstractmethod
+from .utils import Validator, Colors
 
 
-class PieceTypes:
+class PieceNames:
 
-    KING = 'king'
-    QUEEN = 'queen'
-    ROOK = 'rook'
-    BISHOP = 'bishop'
-    KNIGHT = 'knight'
-    PAWN = 'pawn'
+    KING = ('K', 'King')
+    ROOK = ('R', 'Rook')
+    PAWN = ('P', 'Pawn')
+    QUEEN = ('Q', 'Queen')
+    BISHOP = ('B', 'Bishop')
+    KNIGHT = ('N', 'Knight')
 
 
 class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
@@ -17,7 +17,8 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
     @abstractmethod
     def __init__(self, color):
         self.color = color
-        self.type = None
+        self.name = None
+        self.notation = None
 
     @staticmethod
     @abstractmethod
@@ -46,12 +47,6 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
         board[curr_row][curr_column] = None
         return board
 
-    def __str__(self):
-        return f"{COLOR_NAMES[self.color]} {self.type}"
-
-    def __repr__(self):
-        return f"{COLOR_NAMES[self.color]} {self.type}"
-
     @staticmethod
     def collect_board_data(color, board):
         my_figures = {}
@@ -59,13 +54,13 @@ class Figure(metaclass=ABCMeta): # TODO: Implement Singleton for colors
         my_king_pos = opp_king_pos = None
         for i, row in enumerate(board):
             for j, figure in enumerate(row):
-                if isinstance(figure, King):
-                    if figure.color == color:
-                        my_king_pos = (i, j)
-                    else:
-                        opp_king_pos = (i, j)
-                elif figure is not None:
-                    if figure.color == color:
+                if figure is not None:
+                    if isinstance(figure, King):
+                        if figure.color == color:
+                            my_king_pos = (i, j)
+                        else:
+                            opp_king_pos = (i, j)
+                    elif figure.color == color:
                         my_figures[(i, j)] = figure
                     else:
                         opponent_figures[(i, j)] = figure
@@ -121,7 +116,8 @@ class King(Figure):
 
     def __init__(self, color):
         super().__init__(color)
-        self.type = PieceTypes.KING
+        self.name = PieceNames.KING[1]
+        self.notation = PieceNames.KING[0]
 
     @staticmethod
     def possible_moves(curr_pos, color=None):
@@ -129,7 +125,7 @@ class King(Figure):
         up = [(curr_row - 1, curr_column + i) for i in range(-1, 2)]
         curr = [(curr_row, curr_column + i) for i in range(-1, 2)]
         down = [(curr_row + 1, curr_column + i) for i in range(-1, 2)]
-        moves = up + down + curr
+        moves = up + curr + down
         return [pos for pos in moves if Validator.is_valid_pos(pos)]
 
     def is_available_move(self, curr_pos, new_pos, board):
@@ -144,7 +140,8 @@ class Queen(Figure):
 
     def __init__(self, color):
         super().__init__(color)
-        self.type = PieceTypes.QUEEN
+        self.name = PieceNames.QUEEN[1]
+        self.notation = PieceNames.QUEEN[0]
 
     @staticmethod
     def possible_moves(curr_pos, color=None):
@@ -168,7 +165,8 @@ class Rook(Figure):
 
     def __init__(self, color):
         super().__init__(color)
-        self.type = PieceTypes.ROOK
+        self.name = PieceNames.ROOK[1]
+        self.notation = PieceNames.ROOK[0]
 
     @staticmethod
     def possible_moves(curr_pos, color=None):
@@ -213,7 +211,8 @@ class Bishop(Figure):
 
     def __init__(self, color):
         super().__init__(color)
-        self.type = PieceTypes.BISHOP
+        self.name = PieceNames.BISHOP[1]
+        self.notation = PieceNames.BISHOP[0]
 
     @staticmethod
     def possible_moves(curr_pos, color=None):
@@ -265,7 +264,8 @@ class Knight(Figure):
 
     def __init__(self, color):
         super().__init__(color)
-        self.type = PieceTypes.KNIGHT
+        self.name = PieceNames.KNIGHT[1]
+        self.notation = PieceNames.KNIGHT[0]
 
     @staticmethod
     def possible_moves(curr_pos, color=None):
@@ -285,7 +285,8 @@ class Pawn(Figure):
 
     def __init__(self, color):
         super().__init__(color)
-        self.type = PieceTypes.PAWN
+        self.name = PieceNames.PAWN[1]
+        self.notation = PieceNames.PAWN[0]
 
     @staticmethod
     def possible_moves(curr_pos, color=None):
@@ -319,7 +320,7 @@ ORDER = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 PAWNS = [Pawn] * 8
 
 TEXT_FIGURES = {
-    1: {
+    Colors.BLACK: {
         Rook: "♖",
         Knight: "♘",
         Bishop: "♗",
@@ -327,7 +328,7 @@ TEXT_FIGURES = {
         Queen: "♕",
         Pawn: "♙",
     },
-    0: {
+    Colors.WHITE: {
         Rook: "♜",
         Knight: "♞",
         Bishop: "♝",
