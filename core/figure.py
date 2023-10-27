@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from .utils import Validator, Colors
+from utils import Validator, Colors
 
 
 class PieceNames:
